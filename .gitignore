@@ -1,0 +1,99 @@
+# ==========================
+# 🧠 IronCoach Git Ignore
+# Backend (FastAPI) + Frontend (React + Vite) + AI Services
+# ==========================
+
+# ---- Python / FastAPI ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.so
+*.egg-info/
+*.log
+*.sqlite3
+*.db
+*.db-journal
+
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+.Python
+
+# ---- Environment files ----
+.env
+.env.*
+*.secret
+*.key
+
+# ---- IDE / Editor files ----
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- Build / Dist files ----
+build/
+dist/
+*.egg
+*.manifest
+*.spec
+
+# ---- Frontend (React + Vite) ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Vite / React build outputs
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+frontend/.eslintcache
+frontend/coverage/
+
+# ---- Test / Coverage ----
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+coverage/
+.pytest_cache/
+pytestdebug.log
+
+# ---- AI / LangChain ----
+# (Vector DBs, cached embeddings, model outputs)
+*.faiss
+*.chroma
+*.pkl
+*.bin
+*.jsonl
+*.parquet
+*.pt
+*.model
+cache/
+data/
+datasets/
+vectorstore/
+
+# ---- Logs ----
+*.log
+logs/
+log/
+
+# ---- Misc ----
+tmp/
+temp/
+__trash__/
+__old__/
