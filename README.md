@@ -1,4 +1,4 @@
-# IronCoach 🧠
+# IronCoach
 
 **AI 기반 멀티 스포츠 퍼포먼스 코칭 플랫폼**
 
