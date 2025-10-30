@@ -1,16 +1,14 @@
-# app/models/session.py
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+# backend/models/session.py
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from app.core.database import Base
 
 class Session(Base):
     __tablename__ = "sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String, nullable=False)
 
-    # ORM 관계 설정 (User ↔ Session)
+    # ✅ 관계 역참조
     user = relationship("User", back_populates="sessions")

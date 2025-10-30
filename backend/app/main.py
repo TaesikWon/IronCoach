@@ -10,7 +10,7 @@ from app.routers import (
     running,
     swimming,
     tennis,
-    session,   # ✅ 새로 추가
+    session_router,  # ✅ 올바른 파일명
 )
 
 # DB 생성
@@ -27,7 +27,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://127.0.0.1:5173"],  # 프론트엔드 주소
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,9 +41,10 @@ app.include_router(cycling.router)
 app.include_router(running.router)
 app.include_router(swimming.router)
 app.include_router(tennis.router)
-app.include_router(session.router)  # ✅ 세션 라우터 등록
+app.include_router(session_router.router)
+
 
 # ✅ 기본 경로
 @app.get("/")
 def root():
-    return {"message": "IronCoach API is running 🚀"}
+    return {"message": "IronCoach API is running"}
