@@ -4,8 +4,6 @@
 
 달리기 🏃 / 수영 🏊 / 사이클 🚴 / 테니스 🎾 데이터를 분석하고 AI가 개인 맞춤 피드백을 제공하는 스마트 트레이닝 서비스입니다.
 
-🔗 **GitHub Repository**: https://github.com/TaesikWon/IronCoach
-
 ---
 
 ## 💡 프로젝트를 만든 동기
