@@ -1,18 +1,22 @@
-// frontend/src/pages/ChatPage.jsx
-import { useState } from "react";
-import ChatMessage from "../components/ChatMessage"; // ✅ 추가
-import LoadingDots from "../components/LoadingDots"; // ✅ 추가
+import { useState, useEffect, useRef } from "react";
+import ChatMessage from "../components/ChatMessage";
 
-function ChatPage() {
-  const [messages, setMessages] = useState([]); // 대화 히스토리
+export default function ChatPage() {
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
 
-  // 🧠 AI 서버로 메시지 전송
+  // 새 메시지 생길 때마다 자동 스크롤
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  // 메시지 전송
   const sendMessage = async () => {
     if (!input.trim()) return;
-    const userMessage = { role: "user", content: input };
 
+    const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -25,81 +29,56 @@ function ChatPage() {
       });
 
       const data = await res.json();
-      const aiMessage = { role: "assistant", content: data.reply || data.feedback };
-
+      const aiMessage = { role: "assistant", content: data.reply };
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      console.error("❌ Chat error:", error);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "⚠️ 서버 응답 오류가 발생했습니다." },
-      ]);
+    } catch (err) {
+      console.error("❌ Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ⏎ Enter로 메시지 전송
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") sendMessage();
-  };
-
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* 헤더 */}
-      <header className="p-4 bg-blue-600 text-white text-lg font-semibold">
-        🧠 IronCoach 대화 코칭
-      </header>
-
+    <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* 대화 영역 */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`p-3 rounded-2xl max-w-[70%] text-sm ${
-                msg.role === "user"
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-white border rounded-bl-none shadow"
-              }`}
-            >
-              {msg.content}
-            </div>
-          </div>
+      <div className="flex-1 overflow-y-auto p-5 space-y-3">
+        {messages.map((m, i) => (
+          <ChatMessage key={i} role={m.role} content={m.content} />
         ))}
 
-        {/* 로딩 중 애니메이션 */}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white border rounded-2xl px-3 py-2 text-gray-500">
-              <span className="animate-pulse">코치가 생각 중...</span>
-            </div>
-          </div>
-        )}
-      </main>
+        {loading && <ChatMessage role="assistant" content={<TypingDots />} />}
+        <div ref={bottomRef} />
+      </div>
 
       {/* 입력창 */}
-      <footer className="p-4 border-t bg-white flex gap-2">
+      <div className="p-4 bg-white border-t flex gap-2">
         <input
           type="text"
-          className="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="메시지를 입력하세요..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="메시지를 입력하세요..."
+          className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600"
           disabled={loading}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition"
         >
           전송
         </button>
-      </footer>
+      </div>
     </div>
   );
 }
 
-export default ChatPage;
+// ⏳ 로딩 애니메이션
+function TypingDots() {
+  return (
+    <div className="flex gap-1 text-gray-400 text-lg">
+      <span className="animate-bounce delay-0">•</span>
+      <span className="animate-bounce delay-150">•</span>
+      <span className="animate-bounce delay-300">•</span>
+    </div>
+  );
+}
