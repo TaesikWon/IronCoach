@@ -1,98 +1,96 @@
-# ---- Python / FastAPI ----
+# ===========================================
+# IronCoach Global .gitignore
+# ===========================================
+# Covers both backend (FastAPI) and frontend (React/Vite)
+# ===========================================
+
+# === OS / Editor ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === Python (Backend) ===
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-*.pdb
-*.so
-*.egg-info/
-*.log
-*.sqlite3
 *.db
-*.db-journal
-
-# Virtual environment
-.venv/
-env/
-venv/
-ENV/
-.Python
-
-# ---- Environment files ----
+*.sqlite
+*.log
+*.pid
+*.pyc
 .env
-!.env.example     # keep example env file
-.env.*.local
-*.secret
-*.key
-
-# ---- IDE / Editor files ----
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# ---- OS files ----
-.DS_Store
-Thumbs.db
-
-# ---- Build / Dist files ----
-build/
+.env.*
+.venv/
+venv/
+instance/
+.pytest_cache/
+.mypy_cache/
+.cache/
+.coverage
+*.egg-info/
 dist/
-*.egg
-*.manifest
-*.spec
+build/
 
-# ---- Backend cache ----
-backend/__pycache__/
-backend/app/__pycache__/
+# === AI / Vector Store ===
+vectorstore/
+models/
+*.pt
+*.bin
+*.ckpt
+*.jsonl
 
-# ---- Frontend (React + Vite) ----
+# === Node.js (Frontend) ===
 node_modules/
+dist/
+dist-ssr/
+*.local
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-yarn.lock
-pnpm-lock.yaml
+lerna-debug.log*
 
-# Vite / React build outputs
-frontend/dist/
-frontend/.vite/
-frontend/.cache/
-frontend/.eslintcache
-frontend/coverage/
-
-# ---- Test / Coverage ----
-htmlcov/
-.tox/
-.nox/
-coverage.xml
-coverage/
-.pytest_cache/
-pytestdebug.log
-
-# ---- AI / LangChain ----
-# (Vector DBs, cached embeddings, model outputs)
-*.faiss
-*.chroma
-*.pkl
-*.bin
-*.jsonl
-*.parquet
-*.pt
-*.model
-cache/
-data/
-datasets/
-vectorstore/
-
-# ---- Logs ----
-*.log
-logs/
-log/
-
-# ---- Misc ----
+# === Test / Temporary ===
 tmp/
 temp/
-__trash__/
-__old__/
+__tests__/
+coverage/
+reports/
+*.bak
+*.tmp
+
+# === IDE / Dev ===
+*.iml
+.vscode/
+.envrc
+
+# === OS Generated Files ===
+Icon?
+ehthumbs.db
+Desktop.ini
+
+# === Project Specific ===
+# Ignore any secret files
+secrets/
+backend/*.env
+backend/.env
+frontend/.env
+*.key
+*.pem
+
+# === Logs ===
+logs/
+*.log
+*.out
+*.err
+
+# === Local Database ===
+ironcoach.db
