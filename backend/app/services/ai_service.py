@@ -1,7 +1,9 @@
+# backend/app/services/ai_service.py
 from openai import AsyncOpenAI
 from app.core.config import settings
 
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+client = AsyncOpenAI(api_key=settings.openai_api_key)
+
 
 async def analyze_training_session(title: str, description: str) -> str:
     prompt = f"""
