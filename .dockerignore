@@ -1,0 +1,20 @@
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+*.db
+
+# === Node ===
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+# === General ===
+.git
+.gitignore
+.env
+.env.example
