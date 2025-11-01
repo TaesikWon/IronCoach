@@ -1,0 +1,13 @@
+{
+  "_name_or_path": "ironcoach-llm",
+  "architectures": ["GPT2LMHeadModel"],
+  "model_type": "gpt2",
+  "vocab_size": 50257,
+  "n_positions": 1024,
+  "n_ctx": 1024,
+  "n_embd": 768,
+  "n_layer": 12,
+  "n_head": 12,
+  "bos_token_id": 50256,
+  "eos_token_id": 50256
+}
