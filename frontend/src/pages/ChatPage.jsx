@@ -1,87 +1,90 @@
 // frontend/src/pages/ChatPage.jsx
 import { useState } from "react";
-import axios from "axios";
+import ChatMessage from "../components/ChatMessage"; // ✅ 추가
+import LoadingDots from "../components/LoadingDots"; // ✅ 추가
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState([]); // 대화 기록
-  const [input, setInput] = useState(""); // 입력 메시지
+function ChatPage() {
+  const [messages, setMessages] = useState([]); // 대화 히스토리
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 메시지 전송 함수
+  // 🧠 AI 서버로 메시지 전송
   const sendMessage = async () => {
     if (!input.trim()) return;
-    const userMessage = { role: "user", text: input };
-    setMessages([...messages, userMessage]);
+    const userMessage = { role: "user", content: input };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8000/ai/chat", {
-        message: userMessage.text,
+      const res = await fetch("http://127.0.0.1:8000/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
       });
-      const coachMessage = { role: "coach", text: res.data.reply };
-      setMessages((prev) => [...prev, coachMessage]);
-    } catch (err) {
+
+      const data = await res.json();
+      const aiMessage = { role: "assistant", content: data.reply || data.feedback };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("❌ Chat error:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "coach", text: "⚠️ 코치와의 연결에 문제가 발생했습니다." },
+        { role: "assistant", content: "⚠️ 서버 응답 오류가 발생했습니다." },
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  // 엔터 키로 전송
+  // ⏎ Enter로 메시지 전송
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter") sendMessage();
   };
 
   return (
-    <div className="flex flex-col items-center h-screen bg-gray-50 p-6">
-      <h1 className="text-2xl font-bold mb-4">💬 IronCoach 대화형 코칭</h1>
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* 헤더 */}
+      <header className="p-4 bg-blue-600 text-white text-lg font-semibold">
+        🧠 IronCoach 대화 코칭
+      </header>
 
-      {/* 채팅창 */}
-      <div className="w-full max-w-2xl bg-white shadow-md rounded-2xl p-4 flex flex-col h-[70vh] overflow-y-auto border">
-        {messages.length === 0 && (
-          <p className="text-gray-400 text-center mt-20">
-            AI 코치에게 첫 질문을 해보세요! 🏃‍♂️
-          </p>
-        )}
-
-        {messages.map((m, i) => (
+      {/* 대화 영역 */}
+      <main className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.map((msg, i) => (
           <div
             key={i}
-            className={`my-2 flex ${
-              m.role === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`px-4 py-2 rounded-2xl max-w-[75%] ${
-                m.role === "user"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-800"
+              className={`p-3 rounded-2xl max-w-[70%] text-sm ${
+                msg.role === "user"
+                  ? "bg-blue-500 text-white rounded-br-none"
+                  : "bg-white border rounded-bl-none shadow"
               }`}
             >
-              {m.text}
+              {msg.content}
             </div>
           </div>
         ))}
 
+        {/* 로딩 중 애니메이션 */}
         {loading && (
-          <div className="text-gray-400 text-sm text-center my-2">
-            코치가 생각 중입니다 🤔...
+          <div className="flex justify-start">
+            <div className="bg-white border rounded-2xl px-3 py-2 text-gray-500">
+              <span className="animate-pulse">코치가 생각 중...</span>
+            </div>
           </div>
         )}
-      </div>
+      </main>
 
       {/* 입력창 */}
-      <div className="w-full max-w-2xl flex mt-4">
-        <textarea
-          className="flex-grow border rounded-2xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-          rows="2"
+      <footer className="p-4 border-t bg-white flex gap-2">
+        <input
+          type="text"
+          className="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="메시지를 입력하세요..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -89,12 +92,14 @@ export default function ChatPage() {
         />
         <button
           onClick={sendMessage}
+          className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600"
           disabled={loading}
-          className="ml-2 bg-blue-500 text-white px-6 py-2 rounded-2xl hover:bg-blue-600 disabled:opacity-50"
         >
           전송
         </button>
-      </div>
+      </footer>
     </div>
   );
 }
+
+export default ChatPage;
