@@ -1,4 +1,3 @@
-import os
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from langchain.chains import RetrievalQA
@@ -8,9 +7,10 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CrossEncoderReranker
 from sentence_transformers import CrossEncoder
+from langchain.schema.runnable import RunnableLambda  # ✅ 추가
 from openai import AsyncOpenAI
 from app.core.config import settings
-from app.core.db import SessionLocal
+from app.core.database import SessionLocal
 from app.models.session import Feedback
 
 # ---------------------------
@@ -23,7 +23,7 @@ model = AutoModelForCausalLM.from_pretrained("gpt2")
 def generate_response(prompt: str) -> str:
     """GPT2 모델을 이용해 로컬에서 간단한 응답 생성"""
     inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(**inputs, max_new_tokens=512)
+    outputs = model.generate(**inputs, max_new_tokens=256)
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 # ---------------------------
@@ -33,14 +33,9 @@ embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-
 db = Chroma(persist_directory="vectorstore", embedding_function=embeddings)
 retriever = db.as_retriever(search_kwargs={"k": 10})
 
-# 🔥 CrossEncoder 기반 리랭커 (버그 회피용 안전 초기화)
 cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-# ✅ 최신 LangChain(0.3.5)에서는 construct()로 타입 검증 회피
-reranker = CrossEncoderReranker.construct(
-    model=cross_encoder,
-    top_n=3
-)
+reranker = CrossEncoderReranker.construct(model=cross_encoder, top_n=3)
 
 compressed_retriever = ContextualCompressionRetriever(
     base_retriever=retriever,
@@ -52,8 +47,7 @@ compressed_retriever = ContextualCompressionRetriever(
 # ---------------------------
 prompt = PromptTemplate(
     input_variables=["context", "question"],
-    template="""
-당신은 전문 트레이너입니다.
+    template="""당신은 전문 트레이너입니다.
 아래의 세션 기록(context)을 참고하여 피드백을 제공합니다.
 
 [세션 기록]
@@ -69,16 +63,17 @@ prompt = PromptTemplate(
 )
 
 # ---------------------------
-# 🧠 LLM 래퍼 (LangChain 호환용)
+# 🧠 LLM 래퍼 (RunnableLambda 사용)
 # ---------------------------
-class LocalLLMWrapper:
-    def __call__(self, prompt: str):
-        return generate_response(prompt)
+def local_llm(prompt: str) -> str:
+    return generate_response(prompt)
+
+LocalLLM = RunnableLambda(local_llm)  # ✅ LangChain 0.3.x 호환
 
 qa_chain = RetrievalQA.from_chain_type(
-    llm=LocalLLMWrapper(),
+    llm=LocalLLM,  # ✅ 수정됨
     chain_type="stuff",
-    retriever=compressed_retriever,  # ✅ 리랭킹 반영
+    retriever=compressed_retriever,
     chain_type_kwargs={"prompt": prompt},
 )
 
@@ -100,7 +95,7 @@ async def refine_text(text: str) -> str:
     return response.choices[0].message.content.strip()
 
 # ---------------------------
-# 🧩 최종 분석 + PostgreSQL 저장
+# 🧩 최종 분석 + DB 저장
 # ---------------------------
 async def analyze_training_session(title: str, description: str, session_id: int):
     """세션 데이터를 분석하고 AI 피드백을 생성 후 DB 저장"""
@@ -109,9 +104,11 @@ async def analyze_training_session(title: str, description: str, session_id: int
     refined_output = await refine_text(raw_output)
 
     db_session = SessionLocal()
-    feedback = Feedback(session_id=session_id, ai_feedback=refined_output)
-    db_session.add(feedback)
-    db_session.commit()
-    db_session.close()
+    try:
+        feedback = Feedback(session_id=session_id, ai_feedback=refined_output)
+        db_session.add(feedback)
+        db_session.commit()
+    finally:
+        db_session.close()
 
     return refined_output

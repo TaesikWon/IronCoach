@@ -3,8 +3,8 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # 프로젝트 루트 기준
-ENV_PATH = BASE_DIR / ".env"  # .env 절대경로 지정
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+ENV_PATH = BASE_DIR / ".env"
 
 class Settings(BaseSettings):
     # === App Info ===

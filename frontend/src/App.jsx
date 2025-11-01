@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import SessionsPage from "./pages/SessionsPage";
 import SessionPage from "./pages/SessionPage";
 import CreateSessionPage from "./pages/CreateSessionPage";
+import ChatPage from "./pages/ChatPage"; // 👈 추가
 import "./index.css"; // ✅ Tailwind 포함
 
 function App() {
@@ -21,6 +22,9 @@ function App() {
 
         {/* 🆕 세션 생성 */}
         <Route path="/create-session" element={<CreateSessionPage />} />
+
+        {/* 💬 AI 코치 대화 */}
+        <Route path="/chat" element={<ChatPage />} />  {/* 👈 여기에 위치 */}
       </Routes>
     </Router>
   );
